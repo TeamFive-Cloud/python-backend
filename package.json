@@ -1,0 +1,16 @@
+{
+  "name": "python-backend",
+  "version": "1.0.0",
+  "description": "A backend server to scrape news using Python",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1"
+  },
+  "author": "",
+  "license": "ISC"
+}
