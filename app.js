@@ -35,6 +35,7 @@ app.get('/', (req, res) => {
   res.send('Welcome to the backend server!');
 });
 
+// Use the news routes
 app.use('/api/news', newsRoutes);
 
 // Catch-all route for handling 404 errors

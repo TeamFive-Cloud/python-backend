@@ -3,6 +3,7 @@ import { exec } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -24,6 +25,21 @@ router.get('/scrape-news', (req, res) => {
     console.log(`stdout: ${stdout}`);
     console.error(`stderr: ${stderr}`);
     res.send('News scraping completed');
+  });
+});
+
+router.get('/all-news', (req, res) => {
+  console.log('Fetching all news...');
+  const filePath = path.resolve(__dirname, '../allNews.json');
+  console.log(`Reading file from path: ${filePath}`);
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error(`Error reading file: ${err}`);
+      return res.status(500).send('Error reading file');
+    }
+    console.log('File read successfully');
+    res.setHeader('Content-Type', 'application/json');
+    res.send(data);
   });
 });
 
