@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cors from 'cors'; // 引入 CORS 中间件
 import newsRoutes from './routes/news.js';
 
 dotenv.config();
@@ -26,6 +27,9 @@ app.use((req, res, next) => {
   };
   next();
 });
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
