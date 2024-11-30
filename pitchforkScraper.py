@@ -50,6 +50,9 @@ class PitchforkScraper:
                 title = item.select_one('h3.SummaryItemHedBase-hiFYpQ').get_text().strip() if item.select_one('h3.SummaryItemHedBase-hiFYpQ') else 'N/A'
                 artist = item.select_one('div.SummaryItemSubHedBase-gMyBBg').get_text().strip() if item.select_one('div.SummaryItemSubHedBase-gMyBBg') else 'N/A'
                 description = item.select_one('div.SummaryItemDek-CRfsi').get_text().strip() if item.select_one('div.SummaryItemDek-CRfsi') else 'N/A'
+                if description == 'N/A' or not description:
+                    print(f"Skipping review with empty description: {title} by {artist}")
+                    continue
                 img_tag = item.select_one('img.ResponsiveImageContainer-eybHBd')
                 img_url = img_tag['src'] if img_tag else 'N/A'
                 link = "https://pitchfork.com" + item.select_one('a.SummaryItemHedLink-civMjp')['href']
