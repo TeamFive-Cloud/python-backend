@@ -46,22 +46,36 @@ class FreeScoresScraper:
         
         for item in score_items:
             try:
-                title_tag = item.select_one('a.g')
+                title_tag = item.select_one('a.g b')
                 title = title_tag.get_text().strip() if title_tag else 'N/A'
-                pdf_link_tag = item.select_one('a[href*="download-sheet-music.php?pdf="]')
-                pdf_link = "https://www.free-scores.com" + pdf_link_tag['href'] if pdf_link_tag else 'N/A'
-                mp3_link_tag = item.select_one('a[href*=".mp3"]')
-                mp3_link = "https://www.free-scores.com" + mp3_link_tag['href'] if mp3_link_tag else 'N/A'
+                detail_page_tag = item.select_one('a[href*="download-sheet-music.php?pdf="]')
+                detail_page_url = "https:" + detail_page_tag['href'] if detail_page_tag else None
                 
-                self.scores_data.append({
-                    'title': title,
-                    'pdf_link': pdf_link,
-                    'mp3_link': mp3_link
-                })
-                print(f"成功解析乐谱: {title}")
+                if detail_page_url:
+                    detail_page_content = self.fetch_page(detail_page_url)
+                    if detail_page_content:
+                        self.parse_free_scores_detail(detail_page_content, title, detail_page_url)
+                else:
+                    print(f"未找到详细页面链接: {title}")
             except Exception as e:
                 print(f"解析乐谱出错: {str(e)}")
                 continue
+
+    def parse_free_scores_detail(self, html_content, title, detail_page_url):
+        """解析 free-scores.com 乐谱详细信息"""
+        soup = BeautifulSoup(html_content, 'html.parser')
+        pdf_link_tag = soup.select_one('a[href*=".pdf"]')
+        pdf_link = pdf_link_tag['href'] if pdf_link_tag else 'N/A'
+        mp3_link_tag = soup.select_one('a[href*=".mp3"]')
+        mp3_link = "https:" + mp3_link_tag['href'] if mp3_link_tag else 'N/A'
+        
+        self.scores_data.append({
+            'title': title,
+            'detail_page_url': detail_page_url,
+            'pdf_link': pdf_link,
+            'mp3_link': mp3_link
+        })
+        print(f"成功解析乐谱详细信息: {title}")
 
     def crawl(self):
         """爬取 free-scores.com 网站的乐谱信息"""

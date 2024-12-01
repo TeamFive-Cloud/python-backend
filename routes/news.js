@@ -15,6 +15,7 @@ const router = express.Router();
 const pythonPath = process.env.PYTHON_PATH || 'python';
 const newsScriptPath = path.resolve(__dirname, '../newsRequirement.py'); // 确保路径正确
 const pitchforkScriptPath = path.resolve(__dirname, '../pitchforkScraper.py'); // 确保路径正确
+const freeScoresScriptPath = path.resolve(__dirname, '../freeScoresScraper.py'); // 确保路径正确
 
 router.get('/scrape-news', (req, res) => {
   console.log('Attempting to scrape news...');
@@ -42,6 +43,19 @@ router.get('/scrape-pitchfork', (req, res) => {
   });
 });
 
+router.get('/scrape-freescores', (req, res) => {
+  console.log('Attempting to scrape Free Scores...');
+  exec(`${pythonPath} ${freeScoresScriptPath}`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error executing script: ${error}`);
+      return res.status(500).send('Error executing script');
+    }
+    console.log(`stdout: ${stdout}`);
+    console.error(`stderr: ${stderr}`);
+    res.send('Free Scores scraping completed');
+  });
+});
+
 router.get('/all-news', (req, res) => {
   console.log('Fetching all news...');
   const filePath = path.resolve(__dirname, '../allNews.json');
@@ -60,6 +74,22 @@ router.get('/all-news', (req, res) => {
 router.get('/pitchfork-reviews', (req, res) => {
   console.log('Fetching Pitchfork reviews...');
   const filePath = path.resolve(__dirname, '../pitchforkReviews.json');
+  console.log(`Reading file from path: ${filePath}`);
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error(`Error reading file: ${err}`);
+      return res.status(500).send('Error reading file');
+    }
+    console.log('File read successfully');
+    console.log(`Data: ${data}`);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(data);
+  });
+});
+
+router.get('/freescores', (req, res) => {
+  console.log('Fetching Free Scores...');
+  const filePath = path.resolve(__dirname, '../freeScores.json');
   console.log(`Reading file from path: ${filePath}`);
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
