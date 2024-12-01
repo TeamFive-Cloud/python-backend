@@ -25,7 +25,6 @@ class NotesScraper:
             try:
                 response = requests.get(url, headers=self.headers, timeout=10)
                 response.encoding = response.apparent_encoding
-                print(f"Response status code: {response.status_code}")
                 if response.status_code == 200:
                     return response.text
                 else:
@@ -42,30 +41,48 @@ class NotesScraper:
     def parse_8notes(self, html_content):
         """解析 8notes.com 乐谱信息"""
         soup = BeautifulSoup(html_content, 'html.parser')
-        print("Parsing HTML content...")
-        print(html_content)  # 打印完整的HTML内容以进行调试
-        score_items = soup.select('table.table_list tbody tr')  # 根据实际的HTML结构调整选择器
+        score_items = soup.select('tr[onclick]')
         print(f"Found {len(score_items)} score items")
         
-        for item in score_items:
+        for index, item in enumerate(score_items):
             try:
-                title_tag = item.select_one('td.fsmtitle a')
+                title_tag = item.select_one('td.fsmtitle')
                 title = title_tag.get_text().strip() if title_tag else 'N/A'
+                
                 artist_tag = item.select_one('td.artname')
                 artist = artist_tag.get_text().strip() if artist_tag else 'N/A'
-                detail_page_tag = title_tag['href'] if title_tag else None
-                detail_page_url = "https://www.8notes.com" + detail_page_tag if detail_page_tag else None
                 
-                print(f"Title: {title}, Artist: {artist}, Detail Page URL: {detail_page_url}")
+                detail_page_tag = item.get('onclick')
+                detail_page_url = "https://www.8notes.com" + detail_page_tag.split("'")[1] if detail_page_tag else None
                 
-                self.scores_data.append({
-                    'title': title,
-                    'artist': artist,
-                    'link': detail_page_url
-                })
+                if detail_page_url:
+                    detail_page_content = self.fetch_page(detail_page_url)
+                    if detail_page_content:
+                        self.parse_8notes_detail(detail_page_content, title, artist, detail_page_url)
+                else:
+                    print(f"未找到详细页面链接: {title}")
             except Exception as e:
                 print(f"解析乐谱出错: {str(e)}")
                 continue
+
+    def parse_8notes_detail(self, html_content, title, artist, detail_page_url):
+        """解析 8notes.com 乐谱详细信息"""
+        soup = BeautifulSoup(html_content, 'html.parser')
+        audio_tag = soup.select_one('audio#butnum1')
+        audio_src = audio_tag['src'] if audio_tag else 'N/A'
+        audio_src_entire = "https://www.8notes.com" + audio_src
+        img_tag = soup.select_one('img.preview_file')
+        img_src = img_tag['src'] if img_tag else 'N/A'
+        img_src_entire = "https://www.8notes.com" + img_src
+        
+        self.scores_data.append({
+            'title': title,
+            'artist': artist,
+            'link': detail_page_url,
+            'audio': audio_src_entire,
+            'image': img_src_entire
+        })
+        print(f"成功解析乐谱详细信息: {title}")
 
     def crawl(self):
         """爬取 8notes.com 网站的乐谱信息"""
@@ -73,7 +90,6 @@ class NotesScraper:
         html_content = self.fetch_page(url)
         
         if html_content:
-            print("HTML content fetched successfully")
             self.parse_8notes(html_content)
         else:
             print("Failed to fetch HTML content")
