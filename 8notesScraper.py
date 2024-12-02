@@ -86,16 +86,18 @@ class NotesScraper:
 
     def crawl(self):
         """爬取 8notes.com 网站的乐谱信息"""
-        url = 'https://www.8notes.com/all/classical/sheet_music/'
-        html_content = self.fetch_page(url)
-        
-        if html_content:
-            self.parse_8notes(html_content)
-        else:
-            print("Failed to fetch HTML content")
-        
-        # 添加随机延迟
-        time.sleep(random.uniform(2, 4))
+        base_url = 'https://www.8notes.com/all/classical/sheet_music/'
+        for page in range(1, 3):  # 遍历1到10页
+            url = f"{base_url}?page={page}"
+            html_content = self.fetch_page(url)
+            
+            if html_content:
+                self.parse_8notes(html_content)
+            else:
+                print(f"Failed to fetch HTML content for page {page}")
+            
+            # 添加随机延迟
+            time.sleep(random.uniform(2, 4))
 
 def main():
     scraper = NotesScraper()
