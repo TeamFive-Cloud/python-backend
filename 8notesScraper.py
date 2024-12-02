@@ -87,7 +87,7 @@ class NotesScraper:
     def crawl(self):
         """爬取 8notes.com 网站的乐谱信息"""
         base_url = 'https://www.8notes.com/all/classical/sheet_music/'
-        for page in range(1, 3):  # 遍历1到10页
+        for page in range(1, 10):  # 遍历1到10页
             url = f"{base_url}?page={page}"
             html_content = self.fetch_page(url)
             
