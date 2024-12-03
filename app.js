@@ -5,12 +5,15 @@ import { fileURLToPath } from 'url';
 import cors from 'cors'; // 引入 CORS 中间件
 import newsRoutes from './routes/news.js';
 
-dotenv.config();
+dotenv.config(); // 确保在应用程序启动时加载环境变量
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// 验证 dotenv 是否正确加载
+console.log('Environment variable TEST_VAR:', process.env.TEST_VAR);
 
 // Middleware to log all requests
 app.use((req, res, next) => {
@@ -48,9 +51,10 @@ app.use((req, res, next) => {
   console.error(`404 Error - Page not found: ${req.url}`);
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// 移除 app.listen 部分
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
 
 export default app;
